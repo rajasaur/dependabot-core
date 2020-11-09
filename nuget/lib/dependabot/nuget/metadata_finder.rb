@@ -32,7 +32,8 @@ module Dependabot
 
       def source_from_anywhere_in_nuspec(nuspec)
         github_urls = []
-        nuspec.to_s.scan(Source::SOURCE_REGEX) do
+        nuspec.to_s.force_encoding(Encoding::UTF_8).
+          scan(Source::SOURCE_REGEX) do
           github_urls << Regexp.last_match.to_s
         end
 
@@ -47,9 +48,8 @@ module Dependabot
 
         response = Excon.get(
           dependency_nuspec_url,
-          headers: auth_header,
           idempotent: true,
-          **SharedHelpers.excon_defaults
+          **SharedHelpers.excon_defaults(headers: auth_header)
         )
 
         @dependency_nuspec_file = Nokogiri::XML(response.body)
